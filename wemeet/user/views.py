@@ -8,13 +8,13 @@ from .models      import Users
 
 class AccountView(View): 
 
-    def get(self, request): #전체 회원 조회
+    def get(self, request):
         userinfo = list(Users.objects.values())
         return JsonResponse({"data":userinfo},status=200)
 
 class AccountSignUp(View):
 
-    def post(self, request): #회원 가입
+    def post(self, request): 
         data = json.loads(request.body)
         bytedPw = bytes(data["password"],"utf-8")
         hashPw = bcrypt.hashpw(bytedPw, bcrypt.gensalt())
@@ -23,8 +23,6 @@ class AccountSignUp(View):
             name     = data["name"],
             password = decodedPw,
             email    = data["email"]
-             #나머지는 null처리되며 로그인 이후 프로필설정에서 수정가능하다.
-
         ).save()
         return JsonResponse({"message":"SUCCESS"}, status=200)
 
