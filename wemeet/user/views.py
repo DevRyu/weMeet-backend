@@ -39,8 +39,8 @@ class AccountLogin(View):
             if bcrypt.checkpw(data['password'].encode("UTF-8"), user.password.encode("UTF-8")):
                 return JsonResponse({"access_token" : encoded_jwt_id.decode("UTF-8")})
             else :
-                return JsonResponse({"message":"INVALID_PASSWORD"},status=400)
-            return JsonResponse({"message":"SUCCESS"},status=200)
+                return JsonResponse({"message":"INVALID_PASSWORD"}, status=400)
+            return JsonResponse({"message":"SUCCESS"}, status=200)
 
         except Users.DoseNotExist:
             return JsonResponse({"message":"INVALID_USER"}, status=401) 
