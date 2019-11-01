@@ -14,8 +14,10 @@ def login_decorator(func):
                 token_decoded_user = jwt.decode(token_auted_user, WEMEET_SECRET['secret'], algorithms = ['HS256'])
                 request.user = Users.objects.get(id=token_decoded_user["id"])
                 return func(self, request, *args, **kwargs)
+            
             else :
                 return HttpResponse({"message":"INVALID_Token"},status = 401)
+        
         except Exception:
             return HttpResponse({"message":"maybe you are using IE"},status = 400)
     return wrapper

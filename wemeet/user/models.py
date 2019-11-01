@@ -1,5 +1,19 @@
 from django.db import models
 
+class Genders(models.Model):
+
+    gender = models.CharField(max_length=1, null=True)
+
+    class Meta:
+        db_table='genders'
+    
+class Languages(models.Model):
+
+    language = models.CharField(max_length=2, null=True)
+    
+    class Meta:
+        db_table='languages'
+    
 class Users(models.Model):
 
     name = models.CharField(max_length=50)
@@ -11,23 +25,7 @@ class Users(models.Model):
     profile_photo = models.CharField(max_length=4000, null=True)
     sign_up_reason = models.CharField(max_length=60, null=True)
     birthday = models.DateField(null=True)
-    
+    gender = models.ForeignKey(Genders, on_delete   = models.SET_NULL, null = True, blank = True)
+    language = models.ForeignKey(Languages, on_delete = models.SET_NULL, null=True, blank = True)    
     class Meta:
         db_table='users'
-
-class Genders(models.Model):
-
-    id = models.ForeignKey('user.Users', on_delete=models.CASCADE, primary_key=True, null=False, blank=False)
-    gender = models.CharField(max_length=1, null=True)
-
-    class Meta:
-        db_table='genders'
-    
-class Languages(models.Model):
-
-    id = models.ForeignKey('user.Users', on_delete=models.CASCADE, primary_key=True, null=False, blank=False)
-    language = models.CharField(max_length=4, null=True)
-    
-    class Meta:
-        db_table='languages'
-    
