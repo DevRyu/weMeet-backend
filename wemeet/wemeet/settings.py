@@ -1,5 +1,5 @@
 import os
-import my_settings
+from wemeet import my_settings
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user'
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -101,7 +101,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
+#stop warning about slash 
 APPEND_SLASH=False
 
 ##CORS
