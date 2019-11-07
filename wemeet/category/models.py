@@ -1,10 +1,11 @@
 from django.db import models
-class Categories(models.Model):
+class Category(models.Model):
+    
     name = models.CharField(max_length=50, null=False)
-    mainphoto = models.CharField(max_length=4000, null=False)
+    mainphoto = models.URLField(max_length=4000, null=False)
 
     class Meta:
-        db_table= 'categories'
+        db_table= 'category'
 
 
 
