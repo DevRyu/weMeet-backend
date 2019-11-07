@@ -1,7 +1,8 @@
 from django.urls import path
-# from .views      import AccountView, AuthView
+from .views      import EventCreate, AllEventListView, EventDetailView
 
 urlpatterns = [
-    # path('', AccountView.as_view()),
-    # path('/auth',AuthView.as_view())
+    path('/add', EventCreate.as_view()),
+    path('', AllEventListView.as_view()),
+    path('/detail', EventDetailView.as_view()),
 ]
