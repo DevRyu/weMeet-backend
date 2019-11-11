@@ -2,7 +2,7 @@ import jwt
 import json
 import bcrypt
 from django.http import JsonResponse,HttpResponse
-from .models import User
+from user.models import User
 from wemeet.my_settings import WEMEET_SECRET
 
 def login_decorator(func):

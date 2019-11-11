@@ -23,6 +23,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
+    'group',
+    'category',
+    'event',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +125,7 @@ CORS_ALLOW_HEADERS = (
     'accept-encoding',
     'authorization',
     'content-type',
+    'access_token'
     'dnt',
     'origin',
     'user-agent',
