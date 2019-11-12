@@ -16,8 +16,8 @@ def login_decorator(func):
 
         try:
             data = jwt.decode(encode_token, WEMEET_SECRET['secret'], algorithm='HS256') 
-            user = User.objects.get(id = data["user_id"])
-            request.user = user 
+            user         = User.objects.get(id = data["user_id"])
+            request.user = user
 
         except jwt.DecodeError: 
             return JsonResponse({

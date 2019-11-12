@@ -2,39 +2,29 @@ import json
 import jwt
 import bcrypt
 import datetime
+
 from django.views import View
 from django.http  import JsonResponse
-from .util        import login_decorator
+
+from .util              import login_decorator
 from wemeet.my_settings import WEMEET_SECRET
-from user.models  import User
-from group.models import Group
-from .models      import Location, Event, EventUser
-class EventCreate(View):
+from user.models        import User
+from group.models       import Group
+from .models            import Location, Event, EventUser
 
+class Event(View):
     @login_decorator
-    def post(self, request):
-
+    def post(self, request, group_id):
         data = json.loads(request.body)
 
-        host_user_id = request.user.id
-        host_user_object = User.objects.get(id = host_user_id)
-
-        group_id = request.GET.get('group')
-        group_object = Group.objects.get(id = group_id)
-        group_object_by_user = Group.objects.get(id = group_id).host.id
-
         try:
-            if request.GET.get('group') is False:
-                return JsonResponse({"message": "GROOUP_ID_NOT_EXIST"}, status = 404)
+            group = Group.objects.get(id = group_id)
 
-            elif Group.objects.get(id = group_id) is False:
-                return JsonResponse({"message": "GROUP_NOT_EXIST"}, status = 401)
-
-            elif host_user_id != group_object_by_user:
+            if group.host.id == request.user.id:
                 return JsonResponse({"message": "NO_AUTH_HOST"}, status = 401)
 
-            loc = Location.objects.get(name=data["loc_name"])
-            event = Event.objects.create(
+            location = Location.objects.get(name = data["loc_name"])
+            event    = Event.objects.create(
                 title         = data["title"],
                 mainimage     = data["mainimage"],
                 introduction  = data["introduction"],
@@ -43,99 +33,36 @@ class EventCreate(View):
                 end_date      = data["end_date"],
                 limit_user    = data["limit_user"],
                 group         = group_object,
-                location      = loc,
+                location      = location,
             )
-            EventUser.objects.create(
-                user          = host_user_object,
-                event         = event
-                #host 추가해서 식별해주기
-            )
-            return JsonResponse({"event_id":event.id,"message":"SUCCESS"}, status=200)
-        except Exception as e:
-            return JsonResponse({"message": "FALSE"}, status = 500)
-class AllEventListView(View):
 
+            EventUser.objects.create(
+                user  = request.user,
+                event = event
+            )
+
+            return JsonResponse({"event_id":event.id,"message":"SUCCESS"}, status=200)
+        except Group.DoesNotExist:
+            return JsonResponse({"error": "INVALID_GROUP"}, status = 404)
+        except KeyError:
+            return JsonResponse({"message": "INVALID_INPUT"}, status = 404)
+
+class AllEventListView(View):
     def get(self, request):
-        event_all = list(Event.objects.values())        
-        return JsonResponse({"data":event_all,"message":"SUCCESS"},status = 200)
+        return JsonResponse({"data": list(Event.objects.values())}, status = 200)
 
 class EventDetailView(View):
+    @check_login
+    def get(self, request, event_id):
+        event = Event.objects.get(id = event_id)
+        user  = getattr(request, 'user', None)
 
-    def get(self, request):
-        group_id = request.GET.get('group')
-        group_now_id = Group.objects.get(id = group_id).host
-
-        event_id = request.GET.get('event')
-        event_now_id = Event.objects.filter(id = event_id)
-
-        if  "Authorization" not in request.headers:
-            participant = list(EventUser.objects.filter(id = event_id).values())
-            page_detail = list(Event.objects.filter(id = event_id).values())
-            return JsonResponse({"participant":participant,"error_code":"INVALID_LOGIN"}, status=200)
-        try :
-            encode_token = request.headers["Authorization"] 
-            data = jwt.decode(encode_token, WEMEET_SECRET['secret'], algorithm='HS256')
-            request.user = User.objects.get(id = data["user_id"])
-            auth_id = request.user.id
-            
-            if group_now_id == auth_id :
-
-                if event_now_id == group_now_id.host :
-
-                    participant = list(EventUser.objects.filter(id = event_id).values())
-                    page_detail = list(Event.objects.filter(id = event_id).values())
-                    return JsonResponse({"participant":participant,"page_detail":page_detail,"who":"host","message":"SUCCESS"}, status=200)
-               
-                participant = list(EventUser.objects.filter(id = event_id).values())
-                page_detail = list(Event.objects.filter(id = event_id).values())
-                return JsonResponse({"participant":participant,"page_detail":page_detail,"who":"user","message":"SUCCESS"}, status=200)
-
-            participant = list(EventUser.objects.filter(id = event_id).values())
-            page_detail = list(Event.objects.filter(id = event_id).values())
-            return JsonResponse({"participant":participant,"page_detail":page_detail,"who":"user","message":"SUCCESS"}, status=200)
-        
-        except jwt.DecodeError:
-            participant = list(EventUser.objects.filter(id = event_id).values())
-            page_detail = list(Event.objects.filter(id = event_id).values())
-            return JsonResponse({"participant":participant,"page_detail":page_detail,"error_code" : "INVALID_TOKEN"}, status = 401) 
-
-        except User.DoesNotExist:
-            participant = list(EventUser.objects.filter(id = event_id).values())
-            page_detail = list(Event.objects.filter(id = event_id).values())
-            return JsonResponse({"participant" : participant,"page_detail":page_detail,"error_code" : "UNKNOWN_USER"}, status=200)
-
-# class EventParticipant(View):
-#     @login_decorator
-#     def post(self, request):
-#         data = json.loads(request.body)
-
-#         user_id = request.user.id
-#         user_object = User.objects.get(id = host_user_id)
-
-#         group_id = request.GET.get('group')
-#         group_now_id = Group.objects.get(id = group_id).host
-        
-#         event_id = request.GET.get('event')
-#         event_now = Event.objects.get(id = event_id)
-
-#         all_event_user= EventUser.objects.values()
-
-#         try :
-#             if data["participant"] == True: 
-#                 if data["user"] != all_event_user:
-#                     EventUser.objects.create(
-#                         user         =  user_object
-#                         event        =  event_now
-#                         participant  =  True
-#                     )
-#                     return JsonResponse({"message":"SUCEESS"}, status = 200)
-#                 return JsonResponse({"error":"ALREADY_PARTICIPANT"}, status = 401)
-
-#             else :
-#                 if data["participant"] == False:
-#                    if data["user"] == all_event_user:
-#                         EventUser.objects.update(participant = data["participant"])
-
-#                         return JsonResponse({"message":"SUCEESS"}, status = 200)
-
-#                     return JsonResponse({"error":"NOT_ENGATED"}, status = 401)
+        return JsonResponse({
+            "participant": event.user,
+            "page_detail": [{
+                "title"    : event.title,
+                "location" : event.name,
+                # ...                
+            }],
+            "host"  : user and user.id == event.group.host.id
+        }, status=200)

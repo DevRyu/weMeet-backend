@@ -13,7 +13,6 @@ class Location(models.Model):
         db_table = 'location'
 
 class Event(models.Model):
-
     title = models.CharField(max_length = 200)
     mainimage = models.ImageField()
     introduction = models.TextField(max_length = 5000)
@@ -32,7 +31,6 @@ class Event(models.Model):
         db_table = 'event'
 
 class EventUser(models.Model):
-
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     event = models.ForeignKey(Event, on_delete = models.CASCADE)
     participant = models.BooleanField(null=True)

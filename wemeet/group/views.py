@@ -2,52 +2,51 @@ import json
 import jwt
 import bcrypt
 import datetime
+
 from django.views import View
 from django.http  import JsonResponse,HttpResponse
-from .models      import Group, GroupCategory
-from category.models import Category
-from user.models  import User
-from .util        import login_decorator
+
+from .models            import Group, GroupCategory
+from category.models    import Category
+from user.models        import User
+from .util              import login_decorator
 from wemeet.my_settings import WEMEET_SECRET
 
 
-class GroupMake(View):  
-    
+class GroupView(View):  
     @login_decorator
     def post(self,request):
-        data = json.loads(request.body)
-        user = User.objects.get(id=request.user.id)
-        new_group = Group.objects.create(
-            name         = data["name"],
-            introduction = data["introduction"],
-            mainphoto    = data["mainphoto"],
-            host         = user
-        )
-            
-        return JsonResponse({"group_id":new_group.id,"message":"SUCCESS"}, status = 200)
+        try:
+            data      = json.loads(request.body)
+            new_group = Group.objects.create(
+                name         = data["name"],
+                introduction = data["introduction"],
+                mainphoto    = data["mainphoto"],
+                host         = user
+            )
+                
+            return JsonResponse({"group_id":new_group.id,"message":"SUCCESS"}, status = 200)
+        except KeyError:
+            return JsonResponse({"error": "INVALID_KEY"}, status = 400)
 
-class GroupAllList(View):
-
+class GroupListView(View):
     @login_decorator
     def get(self, request):
-
-        user = list(Group.objects.filter(host = request.user.id).values())
-        return JsonResponse({"message":user}, status=200)
+        return JsonResponse({"message" : request.user.groups.values()}, status=200)
 
 class GroupCategoryList(View):
+    def get(self, request, category_id):
+        result = list(GroupCategory.objects.select_related('category').filter(group = category_id).values('category'))
 
-    def get(self, request, pk):
-
-        result = list(GroupCategory.objects.select_related('category').filter(group = pk).values('category'))
         return JsonResponse({"data":result,"message":"SUCCESS"}, status=200)
 
     @login_decorator
     def post(self, request, pk):
-        
-        data = json.loads(request.body)
-        data2 = data['category']
+        ## 위에 변경 사항과 동일하니 참조 하세요
+        data            = json.loads(request.body)
+        data2           = data['category']
         length_category = len(data2)
-        chosen_group = Group.objects.get(id=pk)
+        chosen_group    = Group.objects.get(id     = pk)
 
         try:
             login_user = request.user
@@ -67,22 +66,14 @@ class GroupCategoryList(View):
             return JsonResponse({"message":"SUCCESS"}, status = 200)
                 
         except Exception as e:
-            print(e)
             return HttpResponse(status = 500)
 
-
 class GroupDetailView(View):
-    
     @login_decorator
-    def get(self, request, pk):
+    def get(self, request, group_id):
+        groups = Group.objects.filter(id = group_id).values()
 
-        host_user_id = request.user.id
-        page_now = Group.objects.get(id = pk)
-
-        if page_now.host.id == host_user_id:
-            page_detail = list(Group.objects.filter(id = pk).values())
-            return JsonResponse({"data":page_detail,"who":"host","message":"SUCCESS"}, status = 200)
-            
-        else :
-            page_detail = list(Group.objects.filter(id = pk).values())            
-            return JsonResponse({"data":page_detail,"who":"user","message":"SUCCESS"}, status = 200)
+        return JsonResponse({
+            "data" : list(group),
+            "host" : group.host.id == request.user.id
+        }, status = 200)
