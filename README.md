@@ -1,7 +1,9 @@
 # weMeet-backend    
-EC2, RDS(Mysql), Django, Python packages, Docker
+EC2, RDS(Mysql), Django, Python packages, Docker    
+
 구현 화면    
-![Alt Text](https://media.giphy.com/media/l0RveWuaADnzZ8QNhx/giphy.gif)
+![Alt Text](https://media.giphy.com/media/l0RveWuaADnzZ8QNhx/giphy.gif)    
+
  - 매일 Scrum 회의 진행 및 프론트엔드 개발자와 협업(Trello, Slack)
  - 회원,그룹,그룹의 소모임 이벤트 생성까지의 Api 구축
  - JWT로 로그인 토큰 발행
