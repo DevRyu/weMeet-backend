@@ -2,6 +2,7 @@
 EC2, RDS(Mysql), Django, Python packages, Docker    
 
 구현 화면    
+
 ![Alt Text](https://media.giphy.com/media/l0RveWuaADnzZ8QNhx/giphy.gif)    
 
  - 매일 Scrum 회의 진행 및 프론트엔드 개발자와 협업(Trello, Slack)
