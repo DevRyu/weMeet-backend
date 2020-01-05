@@ -1,7 +1,7 @@
 # weMeet-backend    
 EC2, RDS(Mysql), Django, Python packages, Docker    
 
-구현 화면    
+ 회원들이 소모임을 개설하고 참여하는 플랫폼 서비스    
 
 ![Alt Text](https://media.giphy.com/media/l0RveWuaADnzZ8QNhx/giphy.gif)    
 
